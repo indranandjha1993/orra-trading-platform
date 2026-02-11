@@ -38,6 +38,16 @@ class Settings(BaseSettings):
     super_admin_subjects_csv: str = ""
     stripe_webhook_secret: str = ""
     clerk_webhook_secret: str = ""
+    notification_consumer_group: str = "notifications"
+    notification_consumer_name: str = "worker-1"
+    execution_results_stream_name: str = "execution_results"
+    auth_error_stream_name: str = "auth_errors"
+    notification_failure_stream_name: str = "notification_failures"
+    notification_stream_block_ms: int = 5000
+    n8n_telegram_webhook_url: str = ""
+    n8n_whatsapp_webhook_url: str = ""
+    n8n_email_webhook_url: str = ""
+    n8n_urgent_webhook_url: str = ""
 
     basic_strategy_limit: int = 1
     basic_daily_trade_limit: int = 5

@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass(slots=True)
 class TenantAuthRecord:
     tenant_id: UUID
+    user_id: UUID
     api_key_encrypted: str
     api_secret_encrypted: str
     totp_secret_encrypted: str
@@ -74,8 +75,9 @@ class AuthAgent:
                     try:
                         await self._refresh_single_tenant_token(browser, redis_client, record)
                         refreshed += 1
-                    except Exception:
+                    except Exception as exc:
                         logger.exception("Tenant token refresh failed for tenant=%s", record.tenant_id)
+                        await self._emit_auth_failure_event(redis_client, record, exc)
             finally:
                 await browser.close()
                 await redis_client.aclose()
@@ -88,6 +90,7 @@ class AuthAgent:
             stmt = (
                 select(
                     Tenant.id,
+                    KiteCredential.user_id,
                     KiteCredential.api_key_encrypted,
                     KiteCredential.api_secret_encrypted,
                     KiteCredential.totp_secret_encrypted,
@@ -101,12 +104,31 @@ class AuthAgent:
         return [
             TenantAuthRecord(
                 tenant_id=row.id,
+                user_id=row.user_id,
                 api_key_encrypted=row.api_key_encrypted,
                 api_secret_encrypted=row.api_secret_encrypted,
                 totp_secret_encrypted=row.totp_secret_encrypted,
             )
             for row in rows
         ]
+
+    async def _emit_auth_failure_event(
+        self,
+        redis_client: redis.Redis,
+        record: TenantAuthRecord,
+        error: Exception,
+    ) -> None:
+        await redis_client.xadd(
+            settings.auth_error_stream_name,
+            {
+                "event_type": "auth_2fa_failed",
+                "tenant_id": str(record.tenant_id),
+                "user_id": str(record.user_id),
+                "severity": "urgent",
+                "error": str(error),
+                "occurred_at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
 
     async def _refresh_single_tenant_token(
         self,

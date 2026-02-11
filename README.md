@@ -59,3 +59,15 @@ Run ticker agent (health: `:8020/health`, ready: `:8020/ready`):
 ```bash
 uv run uvicorn src.agents.ticker_service:app --host 0.0.0.0 --port 8020
 ```
+
+Run notification agent (health: `:8030/health`, ready: `:8030/ready`):
+```bash
+uv run uvicorn src.agents.notification_service:app --host 0.0.0.0 --port 8030
+```
+
+## Notification Engine (Phase 7)
+- Consumes Redis streams:
+  - `execution_results` for successful/failed trades
+  - `auth_errors` for urgent auth failures (e.g., 2FA login failure)
+- Dispatches Telegram/WhatsApp/Email via n8n webhook URLs.
+- Auth agent emits `auth_2fa_failed` events into `auth_errors` when tenant login fails, triggering urgent notifications.
