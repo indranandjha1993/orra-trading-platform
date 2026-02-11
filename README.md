@@ -99,6 +99,16 @@ Run a specific test module:
 uv run pytest tests/test_api_routes.py -q
 ```
 
+## CI (GitHub Actions)
+Automated tests run on every pull request and push to `main` via:
+- `.github/workflows/tests.yml`
+
+What the workflow does:
+- runs on `ubuntu-latest`
+- tests against Python `3.12` and `3.13`
+- installs dependencies with `uv sync --dev`
+- runs `uv run pytest --cov=src --cov-report=term-missing`
+
 ## Notification Engine (Phase 7)
 - Consumes Redis streams:
   - `execution_results` for successful/failed trades
