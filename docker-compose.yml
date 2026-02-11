@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: orra_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-orra_app}
+      POSTGRES_USER: ${POSTGRES_USER:-orra_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orra_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-orra_user} -d ${POSTGRES_DB:-orra_app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: orra_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: orra_timescaledb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${TIMESCALE_DB:-orra_market}
+      POSTGRES_USER: ${TIMESCALE_USER:-orra_market_user}
+      POSTGRES_PASSWORD: ${TIMESCALE_PASSWORD:-orra_market_password}
+    ports:
+      - "5433:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${TIMESCALE_USER:-orra_market_user} -d ${TIMESCALE_DB:-orra_market}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  timescale_data:

@@ -1,0 +1,24 @@
+[project]
+name = "orra-trading-platform"
+version = "0.1.0"
+description = "SaaS trading platform backend"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.0",
+    "uvicorn>=0.35.0",
+    "kiteconnect>=5.0.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "alembic>=1.16.0",
+    "pydantic-settings>=2.10.0",
+    "redis>=6.4.0",
+    "playwright>=1.55.0",
+    "python-jose[cryptography]>=3.5.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
