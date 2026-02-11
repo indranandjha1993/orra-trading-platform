@@ -49,6 +49,12 @@ async def _set_tenant_redis_state(tenant_id: str, active: bool) -> None:
 
 
 def _verify_and_parse_event(raw_body: bytes, stripe_signature: str | None) -> dict:
+    if settings.stripe_webhook_secret and not stripe_signature:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Stripe signature",
+        )
+
     if stripe_signature and settings.stripe_webhook_secret:
         try:
             event = stripe.Webhook.construct_event(

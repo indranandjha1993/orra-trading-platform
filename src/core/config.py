@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://orra_user:orra_password@localhost:5432/orra_app"
     redis_url: str = "redis://localhost:6379/0"
 
-    master_encryption_key: str = "replace_with_fernet_key"
+    master_encryption_key: str = ""
 
     clerk_jwks_url: str = "https://example.clerk.accounts.dev/.well-known/jwks.json"
     clerk_issuer: str = "https://example.clerk.accounts.dev"
