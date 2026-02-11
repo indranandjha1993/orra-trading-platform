@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from uuid import UUID
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 import requests
 from fastapi import Depends, HTTPException, Request, status
@@ -22,8 +22,10 @@ bearer_scheme = HTTPBearer(auto_error=True)
 @dataclass(slots=True)
 class AuthContext:
     tenant_id: UUID
+    user_id: UUID
     subject: str
     org_id: str
+    claims: dict
 
 
 class JwksCache:
@@ -118,8 +120,45 @@ async def require_auth_context(
         )
 
     request.state.tenant_id = tenant.id
+    request.state.user_id = subject_to_user_id(subject)
     request.state.auth_claims = claims
     request.state.user_subject = subject
     set_current_tenant_id(tenant.id)
 
-    return AuthContext(tenant_id=tenant.id, subject=subject, org_id=org_id)
+    return AuthContext(
+        tenant_id=tenant.id,
+        user_id=subject_to_user_id(subject),
+        subject=subject,
+        org_id=org_id,
+        claims=claims,
+    )
+
+
+def subject_to_user_id(subject: str) -> UUID:
+    return uuid5(NAMESPACE_URL, f"clerk:{subject}")
+
+
+def _is_super_admin(context: AuthContext) -> bool:
+    if context.subject in settings.super_admin_subjects():
+        return True
+
+    role = context.claims.get("role")
+    if isinstance(role, str) and role.lower() == "super_admin":
+        return True
+
+    roles = context.claims.get("roles")
+    if isinstance(roles, list):
+        return any(str(item).lower() == "super_admin" for item in roles)
+
+    return False
+
+
+async def require_super_admin(
+    context: AuthContext = Depends(require_auth_context),
+) -> AuthContext:
+    if not _is_super_admin(context):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Super Admin role required",
+        )
+    return context

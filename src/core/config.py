@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     ticker_reconnect_initial_delay_seconds: int = 2
     ticker_reconnect_max_delay_seconds: int = 120
     ticker_instrument_tokens_csv: str = ""
+    super_admin_subjects_csv: str = ""
 
     def tenant_zerodha_users(self) -> Mapping[str, str]:
         return json.loads(self.zerodha_user_id_map_json)
@@ -44,6 +45,11 @@ class Settings(BaseSettings):
         if not self.ticker_instrument_tokens_csv.strip():
             return []
         return [int(token.strip()) for token in self.ticker_instrument_tokens_csv.split(",") if token.strip()]
+
+    def super_admin_subjects(self) -> set[str]:
+        if not self.super_admin_subjects_csv.strip():
+            return set()
+        return {value.strip() for value in self.super_admin_subjects_csv.split(",") if value.strip()}
 
 
 settings = Settings()

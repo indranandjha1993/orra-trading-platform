@@ -30,6 +30,16 @@ uv run uvicorn src.api.main:app --reload
 
 Health check: `http://127.0.0.1:8000/health`
 
+## Management API (Phase 4)
+- `PUT /api/v1/account/kite-credentials`
+- `GET /api/v1/account/kite-credentials/status`
+- `POST /api/v1/account/kite/check-connection`
+- `GET /api/v1/profile/trading`
+- `PUT /api/v1/profile/trading`
+- `PATCH /api/v1/profile/trading/master-switch`
+- `GET /api/v1/admin/tenants/active` (Super Admin)
+- `GET /api/v1/admin/system/health` (Super Admin)
+
 ## Agent Services
 Run auth agent (health: `:8010/health`, ready: `:8010/ready`):
 ```bash
