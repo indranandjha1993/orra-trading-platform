@@ -71,3 +71,16 @@ uv run uvicorn src.agents.notification_service:app --host 0.0.0.0 --port 8030
   - `auth_errors` for urgent auth failures (e.g., 2FA login failure)
 - Dispatches Telegram/WhatsApp/Email via n8n webhook URLs.
 - Auth agent emits `auth_2fa_failed` events into `auth_errors` when tenant login fails, triggering urgent notifications.
+
+## Audit Script
+Use `artifacts/audit.sh` to generate command-backed logs and reports under `artifacts/logs` and `artifacts/reports`.
+
+Host mode (default, full infra checks):
+```bash
+bash artifacts/audit.sh
+```
+
+Sandbox mode (skips Docker/socket checks):
+```bash
+bash artifacts/audit.sh --sandbox
+```
