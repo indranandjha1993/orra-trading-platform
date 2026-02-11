@@ -93,6 +93,7 @@ class AuthAgent:
                     KiteCredential.totp_secret_encrypted,
                 )
                 .join(KiteCredential, KiteCredential.tenant_id == Tenant.id)
+                .where(Tenant.is_active.is_(True))
                 .order_by(Tenant.created_at)
             )
             rows = (await session.execute(stmt)).all()

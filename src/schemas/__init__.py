@@ -4,6 +4,7 @@ from src.schemas.account import (
     KiteCredentialStatusResponse,
     KiteCredentialUpsertRequest,
 )
+from src.schemas.billing import BillingWebhookResponse, EntitlementResponse
 from src.schemas.admin import SystemHealthResponse, TenantConnectionStatus
 from src.schemas.profile import (
     MasterSwitchUpdateRequest,
@@ -17,6 +18,8 @@ __all__ = [
     "KiteCredentialStatusResponse",
     "KiteConnectionCheckRequest",
     "KiteConnectionCheckResponse",
+    "EntitlementResponse",
+    "BillingWebhookResponse",
     "TradingProfileUpsertRequest",
     "TradingProfileResponse",
     "MasterSwitchUpdateRequest",

@@ -40,6 +40,15 @@ Health check: `http://127.0.0.1:8000/health`
 - `GET /api/v1/admin/tenants/active` (Super Admin)
 - `GET /api/v1/admin/system/health` (Super Admin)
 
+## Billing & Subscription (Phase 5)
+- `GET /api/v1/billing/entitlements`
+- `POST /api/v1/billing/guards/strategy` (Basic: 1 active strategy, Pro: unlimited)
+- `POST /api/v1/billing/guards/trade` (Basic: 5/day, Pro: unlimited)
+- `POST /api/v1/billing/guards/priority` (Pro only)
+- `POST /api/v1/webhooks/billing` (`invoice.paid`, `subscription.deleted`)
+
+On `subscription.deleted`, tenant `is_active` is set to `False`, all tenant strategy instances are deactivated, and runtime Redis state flips to inactive (`tenant:active:{tenant_id}`).
+
 ## Agent Services
 Run auth agent (health: `:8010/health`, ready: `:8010/ready`):
 ```bash

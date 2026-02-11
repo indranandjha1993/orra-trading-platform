@@ -17,6 +17,7 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "requests>=2.32.0",
     "pyotp>=2.9.0",
+    "stripe>=11.0.0",
 ]
 
 [build-system]

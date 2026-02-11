@@ -11,3 +11,4 @@ class Tenant(TenantScopedBase):
 
     clerk_org_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     subscription_tier: Mapped[str] = mapped_column(String(50), nullable=False, default="free")
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=True, index=True)

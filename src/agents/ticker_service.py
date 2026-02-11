@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import json
 import logging
+import time
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -47,6 +48,8 @@ class TenantTickerWorker:
         self._should_run = True
         self._disconnect_event = asyncio.Event()
         self._kws: KiteTicker | None = None
+        self._tenant_active_cache = True
+        self._tenant_active_checked_at = 0.0
 
     async def stop(self) -> None:
         self._should_run = False
@@ -93,6 +96,17 @@ class TenantTickerWorker:
             delay = min(delay * 2, settings.ticker_reconnect_max_delay_seconds)
 
     def _configure_callbacks(self, kws: KiteTicker) -> None:
+        def is_tenant_active() -> bool:
+            now = time.monotonic()
+            if now - self._tenant_active_checked_at < 1.0:
+                return self._tenant_active_cache
+
+            raw = self.redis_client.get(f"tenant:active:{self.tenant_id}")
+            # Missing key defaults to active for backward compatibility.
+            self._tenant_active_cache = raw is None or raw in {"1", "true", "active", "True"}
+            self._tenant_active_checked_at = now
+            return self._tenant_active_cache
+
         def on_connect(ws: KiteTicker, response: dict) -> None:
             logger.info("Ticker connected for tenant=%s", self.tenant_id)
             ws.subscribe(self.instrument_tokens)
@@ -100,6 +114,8 @@ class TenantTickerWorker:
             self.health.metrics["active_connections"] = self.health.metrics.get("active_connections", 0) + 1
 
         def on_ticks(ws: KiteTicker, ticks: list[dict]) -> None:
+            if not is_tenant_active():
+                return
             for tick in ticks:
                 instrument_token = tick.get("instrument_token")
                 if instrument_token is None:
@@ -201,6 +217,7 @@ class TickerAgent:
             stmt = (
                 select(Tenant.id, KiteCredential.api_key_encrypted)
                 .join(KiteCredential, KiteCredential.tenant_id == Tenant.id)
+                .where(Tenant.is_active.is_(True))
                 .order_by(Tenant.created_at)
             )
             rows = (await session.execute(stmt)).all()

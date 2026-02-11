@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     clerk_jwks_url: str = "https://example.clerk.accounts.dev/.well-known/jwks.json"
     clerk_issuer: str = "https://example.clerk.accounts.dev"
     clerk_audience: str = ""
+    clerk_secret_key: str = ""
+    clerk_api_base_url: str = "https://api.clerk.com/v1"
 
     auth_refresh_interval_seconds: int = 86400
     auth_token_ttl_seconds: int = 72000
@@ -34,6 +36,11 @@ class Settings(BaseSettings):
     ticker_reconnect_max_delay_seconds: int = 120
     ticker_instrument_tokens_csv: str = ""
     super_admin_subjects_csv: str = ""
+    stripe_webhook_secret: str = ""
+    clerk_webhook_secret: str = ""
+
+    basic_strategy_limit: int = 1
+    basic_daily_trade_limit: int = 5
 
     def tenant_zerodha_users(self) -> Mapping[str, str]:
         return json.loads(self.zerodha_user_id_map_json)
