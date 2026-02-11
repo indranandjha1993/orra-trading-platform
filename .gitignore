@@ -49,4 +49,3 @@ playwright-report/
 
 # Database/local runtime
 *.sqlite3
-alembic/versions/
