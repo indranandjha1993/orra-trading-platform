@@ -1,6 +1,12 @@
-# Orra Trading Platform
+# Orra Trading Platform: Multi-Tenant SaaS Trading Backend
 
-Backend foundation for a SaaS trading platform.
+Production-oriented backend foundation for a multi-tenant algorithmic trading SaaS.
+
+It provides:
+- tenant-isolated APIs with auth and role enforcement
+- secure credential handling (encrypted at rest)
+- event-driven background agents for auth token refresh, market ticker ingestion, and user notifications
+- subscription-aware feature gating with billing webhooks
 
 ## Stack
 - FastAPI
