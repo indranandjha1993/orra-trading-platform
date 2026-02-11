@@ -25,15 +25,28 @@ uv sync
 uv run playwright install chromium
 cp .env.example .env
 docker compose up -d
+uv run alembic upgrade head
 uv run uvicorn src.api.main:app --reload
 ```
 
 Health check: `http://127.0.0.1:8000/health`
 
+## Required Environment Variables
+Set these in `.env` before running full flows:
+- `MASTER_ENCRYPTION_KEY`
+- `CLERK_JWKS_URL`, `CLERK_ISSUER`, `CLERK_SECRET_KEY`
+- `KITE_API_KEY`, `KITE_API_SECRET` (if used by your flow)
+- `ZERODHA_USER_ID_MAP_JSON`
+- `ZERODHA_PASSWORD_MAP_JSON`
+- `TICKER_INSTRUMENT_TOKENS_CSV`
+- `N8N_TELEGRAM_WEBHOOK_URL`, `N8N_WHATSAPP_WEBHOOK_URL`, `N8N_EMAIL_WEBHOOK_URL`
+- `N8N_URGENT_WEBHOOK_URL`
+
 ## Management API (Phase 4)
 - `PUT /api/v1/account/kite-credentials`
 - `GET /api/v1/account/kite-credentials/status`
 - `POST /api/v1/account/kite/check-connection`
+- `POST /api/v1/connections/kite/test` (tenant-scoped connection test by `user_id`)
 - `GET /api/v1/profile/trading`
 - `PUT /api/v1/profile/trading`
 - `PATCH /api/v1/profile/trading/master-switch`
@@ -63,6 +76,27 @@ uv run uvicorn src.agents.ticker_service:app --host 0.0.0.0 --port 8020
 Run notification agent (health: `:8030/health`, ready: `:8030/ready`):
 ```bash
 uv run uvicorn src.agents.notification_service:app --host 0.0.0.0 --port 8030
+```
+
+Agent notes:
+- Auth agent requires valid tenant credential records plus `ZERODHA_USER_ID_MAP_JSON` and `ZERODHA_PASSWORD_MAP_JSON`.
+- Ticker agent requires `TICKER_INSTRUMENT_TOKENS_CSV` and Redis access tokens (`kite:access_token:{tenant_id}`).
+- Notification agent requires n8n webhook URLs for channels you enable.
+
+## Testing
+Run all tests:
+```bash
+uv run pytest
+```
+
+Run tests with coverage:
+```bash
+uv run pytest --cov=src --cov-report=term-missing
+```
+
+Run a specific test module:
+```bash
+uv run pytest tests/test_api_routes.py -q
 ```
 
 ## Notification Engine (Phase 7)
